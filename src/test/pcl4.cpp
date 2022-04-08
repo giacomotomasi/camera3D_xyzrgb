@@ -69,11 +69,9 @@ void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg){
     pub.publish (cloud_filtered);
 }
 
-int
-main (int argc, char** argv)
-{
+int main (int argc, char** argv) {
   // Initialize ROS
-  ros::init (argc, argv, "my_pcl_tutorial");
+  ros::init (argc, argv, "pcd_filter");
   ros::NodeHandle nh;
 
   // Create a ROS subscriber for the input point cloud

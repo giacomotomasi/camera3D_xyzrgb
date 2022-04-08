@@ -20,20 +20,23 @@ include_directories(
 )
 
 
-add_executable(points_subscriber src/points_subscriber.cpp)
+add_executable(points_subscriber src/test/points_subscriber.cpp)
 target_link_libraries(points_subscriber ${catkin_LIBRARIES})
 
-add_executable(pcl1 src/pcl1.cpp)
+add_executable(pcl1 src/test/pcl1.cpp)
 target_link_libraries(pcl1 ${catkin_LIBRARIES})
 
-add_executable(pcl2 src/pcl2.cpp)
+add_executable(pcl2 src/test/pcl2.cpp)
 target_link_libraries(pcl2 ${catkin_LIBRARIES})
 
-add_executable(pcl3 src/pcl3.cpp)
+add_executable(pcl3 src/test/pcl3.cpp)
 target_link_libraries(pcl3 ${catkin_LIBRARIES})
 
-add_executable(pcl4 src/pcl4.cpp)
+add_executable(pcl4 src/test/pcl4.cpp)
 target_link_libraries(pcl4 ${catkin_LIBRARIES})
+
+add_executable(main src/obstacle_detection_v1/main.cpp)
+target_link_libraries(main ${catkin_LIBRARIES})
 
 
 
