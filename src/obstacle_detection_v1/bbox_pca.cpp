@@ -33,14 +33,17 @@ public:
             pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
             // convert cloud to pcl::PointXYZRGB
             pcl::fromROSMsg((*clusters_msg).clusters.at(i), *cloud);
-            (*bbox_markers).markers.push_back(getBBox(cloud, i));
+            visualization_msgs::Marker marker, text_marker;
+            tie(marker, text_marker) = getBBox(cloud, i);
+            (*bbox_markers).markers.push_back(marker);
+            (*bbox_markers).markers.push_back(text_marker);
             }
         bbox_pub.publish(bbox_markers);
     }
 
 
     // function to find BBOX
-    visualization_msgs::Marker getBBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster, int j){
+    std:: tuple<visualization_msgs::Marker, visualization_msgs::Marker> getBBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster, int j){
         
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
         pcl::PCA<pcl::PointXYZRGB> pca;
@@ -58,21 +61,18 @@ public:
         tf::matrixEigenToTF(eigen_vector_pca_double, tf_rotation);
         
         tf_rotation.getRotation(quat);
-//        double roll, pitch, yaw;
-//        tf_rotation.getRPY(roll, pitch, yaw);
-            
+        
         // create marker correspoinding to the bbox
         visualization_msgs::Marker marker;
-        marker.type = visualization_msgs::Marker::CUBE;
-        marker.action = visualization_msgs::Marker::ADD;
         
         marker.header.frame_id = "camera_depth_optical_frame";
-        std::stringstream obs;
-        obs << "Obstacle " << j;
-        marker.text = obs.str();
+//        std::stringstream obs;
+//        obs << "Obstacle " << j;
+        marker.ns = "Obstacle";
         marker.header.stamp = ros::Time::now();
         marker.id = j;
-
+        marker.type = visualization_msgs::Marker::CUBE;
+        marker.action = visualization_msgs::Marker::ADD;
         marker.lifetime = ros::Duration(0);
         marker.pose.position.x = cluster_centroid(0);
         marker.pose.position.y = cluster_centroid(1);
@@ -88,8 +88,41 @@ public:
         marker.color.r = 1.0;
         marker.color.g = 0.0;
         marker.color.b = 0;
+//        std::cout << "diff x " << j << " " << max_point_OBB.x - min_point_OBB.x << std::endl;
+//        std::cout << "diff y " << j << " " << max_point_OBB.y - min_point_OBB.y << std::endl;
+//        std::cout << "diff z " << j << " " << max_point_OBB.z - min_point_OBB.z << std::endl;
         
-        return marker;
+        // create TEXT marker
+        visualization_msgs::Marker text_marker;
+        text_marker.header.frame_id = "camera_depth_optical_frame";
+        std::stringstream obs;
+        obs << "Obstacle " << j;
+        text_marker.text = obs.str();
+        text_marker.ns = "Obstacle";
+        text_marker.header.stamp = ros::Time::now();
+        text_marker.id = j+100;
+        text_marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+        text_marker.action = visualization_msgs::Marker::ADD;
+        text_marker.lifetime = ros::Duration(0);
+        text_marker.pose.position.x = cluster_centroid(0);
+        text_marker.pose.position.y = cluster_centroid(1) - ((max_point.x - min_point.x)/2 + 0.04);;
+        text_marker.pose.position.z = cluster_centroid(2);
+        text_marker.pose.orientation.x = quat.getAxis().getX();
+        text_marker.pose.orientation.y = quat.getAxis().getY();
+        text_marker.pose.orientation.z = quat.getAxis().getZ();
+        text_marker.pose.orientation.w = quat.getW();
+        text_marker.scale.x = max_point.x - min_point.x;
+        text_marker.scale.y = max_point.y - min_point.y;
+        text_marker.scale.z = max_point.z - min_point.z;
+        text_marker.scale.x = 0.04;
+        text_marker.scale.y = 0.04;
+        text_marker.scale.z = 0.04;
+        text_marker.color.a = 1.0;
+        text_marker.color.r = 1.0;
+        text_marker.color.g = 0.0;
+        text_marker.color.b = 0;
+        
+        return {marker, text_marker};
         }
     
     // Constructor
