@@ -88,6 +88,9 @@ public:
         marker.color.r = 1.0;
         marker.color.g = 0.0;
         marker.color.b = 0;
+//        std::cout << "diff x " << j << " " << max_point_OBB.x - min_point_OBB.x << std::endl;
+//        std::cout << "diff y " << j << " " << max_point_OBB.y - min_point_OBB.y << std::endl;
+//        std::cout << "diff z " << j << " " << max_point_OBB.z - min_point_OBB.z << std::endl;
         
         // create TEXT marker
         visualization_msgs::Marker text_marker;
@@ -102,7 +105,7 @@ public:
         text_marker.action = visualization_msgs::Marker::ADD;
         text_marker.lifetime = ros::Duration(0);
         text_marker.pose.position.x = position_OBB.x;
-        text_marker.pose.position.y = position_OBB.y - 0.03;
+        text_marker.pose.position.y = position_OBB.y - ((max_point_OBB.x - min_point_OBB.x)/2 + 0.04);
         text_marker.pose.position.z = position_OBB.z;
         text_marker.pose.orientation.x = quat.x();
         text_marker.pose.orientation.y = quat.y();
