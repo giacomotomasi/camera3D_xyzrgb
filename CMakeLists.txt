@@ -56,8 +56,11 @@ target_link_libraries(pcl4 ${catkin_LIBRARIES})
 add_executable(clustering1 src/obstacle_detection_v1/clustering1.cpp)
 target_link_libraries(clustering1 ${catkin_LIBRARIES})
 
-add_executable(bbox_backup src/obstacle_detection_v1/bbox_backup.cpp)
-target_link_libraries(bbox_backup ${catkin_LIBRARIES})
+add_executable(bbox_pca src/obstacle_detection_v1/bbox_pca.cpp)
+target_link_libraries(bbox_pca ${catkin_LIBRARIES})
+
+add_executable(bbox_moi src/obstacle_detection_v1/bbox_moi.cpp)
+target_link_libraries(bbox_moi ${catkin_LIBRARIES})
 
 add_executable(saveSingleMsg src/obstacle_detection_v1/saveSingleMsg.cpp)
 target_link_libraries(saveSingleMsg ${catkin_LIBRARIES})
