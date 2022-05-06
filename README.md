@@ -2,8 +2,8 @@
 Package for PointCloud filtering using PCL (point cloud library) and Intel RealSense camera.
 
 pointCloud processing steps:
-- Voxel grid point reduction;
-- Segmentation for gorund detection (RANSAC);
+- Voxel Grid point reduction;
+- Segmentation for ground/plane detection (RANSAC);
 - Outlier removal;
 - Clustering (euclidean cluster extraction);
 - 3D bounding box extraction with PCA (bbox_pca.cpp) or moment of inertia (bbox_moi.cpp) methods;
@@ -14,6 +14,9 @@ The launch file provides a bag file with a PointCloud used to detect two obstacl
 ```
 roslaunch realsense_devel sim.launch
 ```
+### Result
+![Result in Rviz](https://github.com/giacomotomasi/realsense_devel/blob/main/img/rviz_result.png)
+
 ### To keep in mind
 The processing algorithms are tuned to this specific application example. You need to set proper parameters for your own application.
 ### Improvemets
