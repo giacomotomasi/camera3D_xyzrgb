@@ -14,6 +14,6 @@ The launch file provides a bag file with a PointCloud used to detect two obstacl
 roslaunch realsense_devel sim.launch
 ```
 ### To keep in mind
-The processing algorithms are tuned to the specific application, you need to set proper parameters for your own application.
+The processing algorithms are tuned to this specific application example. You need to set proper parameters for your own application.
 ### Improvemets
 Further improvement will cover fancier code structure and more filtering algorithms.
