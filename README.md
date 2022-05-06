@@ -8,12 +8,12 @@ pointCloud processing steps:
 - Clustering (euclidean cluster extraction);
 - 3D bounding box extraction with PCA (bbox_pca.cpp) or moment of inertia (bbox_moi.cpp) methods;
 - Rviz visualization;
-##### Example
+### Example
 The launch file provides a bag file with a PointCloud used to detect two obstacles. It launches the bag file, the clustering node, the bbox_moi node and Rviz window.
 ```
 roslaunch realsense_devel sim.launch
 ```
-##### To keep in mind
+### To keep in mind
 The processing algorithms are tuned to the specific application, you need to set proper parameters for your own application.
-###### The smallest heading
+### Improvemets
 Further improvement will cover fancier code structure and more filtering algorithms.
