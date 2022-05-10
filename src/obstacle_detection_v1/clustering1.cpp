@@ -41,6 +41,8 @@ public:
         Detector::outlier_removal();
         Detector::cluster_extraction(); // includes publish method
         
+        Detector::outlier_removal();
+        
         Detector::publish();
         };
         
