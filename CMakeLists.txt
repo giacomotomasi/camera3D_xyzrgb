@@ -29,6 +29,7 @@ generate_messages(
 )
 
 catkin_package(
+  INCLUDE_DIRS include
   CATKIN_DEPENDS 
   message_runtime
 )
@@ -36,21 +37,17 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${PROJECT_SOURCE_DIR}/include
 )
 
+add_executable(detector_node src/detector_node.cpp src/Detector.cpp)
+target_link_libraries(detector_node ${catkin_LIBRARIES})
 
+add_executable(bbox_node src/bbox_node.cpp src/Bbox.cpp)
+target_link_libraries(bbox_node ${catkin_LIBRARIES})
 
-add_executable(clustering1 src/obstacle_detection_v1/clustering1.cpp)
-target_link_libraries(clustering1 ${catkin_LIBRARIES})
+#add_executable(bbox_pca src/bbox_pca.cpp)
+#target_link_libraries(bbox_pca ${catkin_LIBRARIES})
 
-add_executable(bbox_pca src/obstacle_detection_v1/bbox_pca.cpp)
-target_link_libraries(bbox_pca ${catkin_LIBRARIES})
-
-add_executable(bbox_moi src/obstacle_detection_v1/bbox_moi.cpp)
-target_link_libraries(bbox_moi ${catkin_LIBRARIES})
-
-
-
-
-
-
+#add_executable(bbox_moi src/bbox_moi.cpp)
+#target_link_libraries(bbox_moi ${catkin_LIBRARIES})

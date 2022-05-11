@@ -9,6 +9,6 @@
 
   <!-- <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find realsense_devel)/rviz/sim.rviz"/> -->
   <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find realsense_devel)/rviz/sim_bbox.rviz"/>
-  <node name="clustering1" pkg="realsense_devel" type="clustering1" output="screen" />
-  <node name="bbox_moi" pkg="realsense_devel" type="bbox_moi" output="screen" />
+  <node name="detector_node" pkg="realsense_devel" type="detector_node" output="screen" />
+  <node name="bbox_node" pkg="realsense_devel" type="bbox_node" output="screen" />
 </launch>
