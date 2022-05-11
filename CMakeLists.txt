@@ -45,9 +45,3 @@ target_link_libraries(detector_node ${catkin_LIBRARIES})
 
 add_executable(bbox_node src/bbox_node.cpp src/Bbox.cpp)
 target_link_libraries(bbox_node ${catkin_LIBRARIES})
-
-#add_executable(bbox_pca src/bbox_pca.cpp)
-#target_link_libraries(bbox_pca ${catkin_LIBRARIES})
-
-#add_executable(bbox_moi src/bbox_moi.cpp)
-#target_link_libraries(bbox_moi ${catkin_LIBRARIES})
