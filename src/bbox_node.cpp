@@ -14,7 +14,7 @@ int main(int argc, char** argv){
     ros::init(argc, argv, "bbox_node");
     
     ros::NodeHandle n;
-    // Momento of inertia method
+    // Moment of inertia method
     BoundingBox_moi b(&n);
     // Principal Component Analisys method
     // BoundingBox_pca b(&n);

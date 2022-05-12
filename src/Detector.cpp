@@ -62,8 +62,6 @@ void Detector::segmentation(){
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr indices (new pcl::PointIndices);
     pcl::SACSegmentation<pcl::PointXYZRGB> seg;
-    // pcl::SACSegmentation<pcl::PCLPointCloud2> seg; // errors raise with <pcl::PCLPointCloud2> type
-    // Optional
     seg.setOptimizeCoefficients(true);
     // Mandatory
     seg.setModelType(pcl::SACMODEL_PLANE);
@@ -111,13 +109,11 @@ void Detector::cluster_extraction(){
     ec.setSearchMethod(tree);
     ec.setInputCloud(cloud);
     ec.extract(cluster_indices);
-    
     realsense_devel::ClustersArray clusters_array;
     
     // Now we extracted the clusters out of our point cloud and saved the indices in cluster_indices. 
     // To separate each cluster out of the vector<PointIndices> we have to iterate through cluster_indices, 
     // create a new PointCloud for each entry and write all points of the current cluster in the PointCloud.
-    
     pcl::PointIndices::Ptr indices (new pcl::PointIndices);
     for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it){
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -141,7 +137,6 @@ void Detector::cluster_extraction(){
         }
         
         Detector::extract_indices(indices, false);
-        
         clusters_pub.publish(clusters_array);
     }
     
@@ -156,10 +151,8 @@ void Detector::publish(){
 // Constructor
 Detector::Detector(ros::NodeHandle *n1){
     std::cout << "\033[1;32m Detector constructor called.\033[0m" << std::endl; // print in green color
-    // ROS_INFO("\033[1;32m Detector constructor called.\033[0m");
     // Create pointer in the heap
     cloud = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>);
-    // cloud_cluster = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>);
     // Create a ROS subscriber for the input point cloud
     cloud_sub = n1->subscribe ("/camera/depth/color/points", 1, &Detector::cloud_callback, this);
     // Create a ROS publisher for the filtered point cloud and for the clusters
@@ -168,6 +161,5 @@ Detector::Detector(ros::NodeHandle *n1){
     }
 // Destructor
 Detector::~Detector(){
-    std::cout << "\033[1;32m Detector deconstructor called.\033[0m" << std::endl; 
-    // ROS_INFO("\033[1;32m Detector deconstructor called.\033[0m");
+    std::cout << "\033[1;32m Detector deconstructor called.\033[0m" << std::endl;
     }
