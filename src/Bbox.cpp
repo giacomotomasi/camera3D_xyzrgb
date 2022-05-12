@@ -1,3 +1,10 @@
+/*
+ * Project: Object detection                    
+ * Author: Giacomo Tomasi              
+ * E-Mail: giacomo.tomasi@unibz.it         
+ * Date: April 2021                        
+ * File: Bbox.cpp                          */
+
 #include<iostream>
 
 #include<ros/ros.h>

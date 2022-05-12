@@ -1,3 +1,10 @@
+/*
+ * Project: Object detection                    
+ * Author: Giacomo Tomasi              
+ * E-Mail: giacomo.tomasi@unibz.it         
+ * Date: April 2021                        
+ * File: Detector.h                          */
+
 #ifndef _DETECTOR_H_
 #define _DETECTOR_H_
 

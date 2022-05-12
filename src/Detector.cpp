@@ -1,3 +1,10 @@
+/*
+ * Project: Object detection                    
+ * Author: Giacomo Tomasi              
+ * E-Mail: giacomo.tomasi@unibz.it         
+ * Date: April 2021                        
+ * File: Detector.cpp                          */
+ 
 #include <iostream>
 #include "ros/ros.h"
 #include "sensor_msgs/PointCloud2.h"
