@@ -31,12 +31,19 @@
 void Detector::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg){
     // convert cloud to pcl::PointXYZRGB
     pcl::fromROSMsg (*cloud_msg, *cloud);
-    // Detector::voxel_grid();
-    Detector::pass_through();
-    Detector::segmentation();
-    Detector::outlier_removal();
-    Detector::cluster_extraction(); // includes publish method
-    Detector::outlier_removal();
+    if (voxel_grid_enabled)
+        Detector::voxel_grid();
+    if (pass_through_enabled)
+        Detector::pass_through();
+    if (segmentation_enabled)
+        Detector::segmentation();
+    if (outlier_removal_enabled)
+        Detector::outlier_removal();
+    if (cluster_extraction_enabled)
+        Detector::cluster_extraction(); // includes publish method
+    if (outlier_removal_enabled)
+        Detector::outlier_removal();
+    
     Detector::publish();
     }
     
@@ -44,7 +51,7 @@ void Detector::voxel_grid(){
     // VoxelGrid
     pcl::VoxelGrid<pcl::PointXYZRGB> voxel_grid;
     voxel_grid.setInputCloud (cloud);
-    voxel_grid.setLeafSize (0.05, 0.05, 0.05);
+    voxel_grid.setLeafSize (size_x,size_y,size_z);
     voxel_grid.filter (*cloud);
     }
 
@@ -53,7 +60,7 @@ void Detector::pass_through(){
     pcl::PassThrough<pcl::PointXYZRGB> pass;
     pass.setInputCloud (cloud);
     pass.setFilterFieldName ("z");
-    pass.setFilterLimits (0.0, 1.0);
+    pass.setFilterLimits (z_min,z_max);
     pass.filter (*cloud);
     }
 
@@ -66,7 +73,7 @@ void Detector::segmentation(){
     // Mandatory
     seg.setModelType(pcl::SACMODEL_PLANE);
     seg.setMethodType(pcl::SAC_RANSAC);
-    seg.setDistanceThreshold (0.01);
+    seg.setDistanceThreshold (distance_threshold);
     seg.setInputCloud(cloud);
     seg.segment(*indices, *coefficients);
     if (indices->indices.size() == 0)
@@ -91,8 +98,8 @@ void Detector::outlier_removal(){
     // Outlier removal
     pcl::StatisticalOutlierRemoval<pcl::PointXYZRGB> sor;
     sor.setInputCloud(cloud);
-    sor.setMeanK(50);
-    sor.setStddevMulThresh (1.0);
+    sor.setMeanK(meanK);
+    sor.setStddevMulThresh (standard_dev_mult);
     sor.filter(*cloud);
     }
     
@@ -103,9 +110,9 @@ void Detector::cluster_extraction(){
     std::vector<pcl::PointIndices> cluster_indices;
     
     pcl::EuclideanClusterExtraction<pcl::PointXYZRGB> ec;
-    ec.setClusterTolerance(0.02); // 2cm
-    ec.setMinClusterSize(1000);
-    ec.setMaxClusterSize(25000);
+    ec.setClusterTolerance(cluster_tolerance); // 2cm
+    ec.setMinClusterSize(min_cluster_size);
+    ec.setMaxClusterSize(max_cluster_size);
     ec.setSearchMethod(tree);
     ec.setInputCloud(cloud);
     ec.extract(cluster_indices);
@@ -158,6 +165,23 @@ Detector::Detector(ros::NodeHandle *n1){
     // Create a ROS publisher for the filtered point cloud and for the clusters
     cloud_pub = n1->advertise<pcl::PCLPointCloud2>("pcl_filtered", 1);
     clusters_pub = n1->advertise<realsense_devel::ClustersArray>("pcl_clusters", 1);
+    // get ros parameters
+    n1->param("/voxel_grid/x",size_x,0.05);
+    n1->param("/voxel_grid/y",size_y,0.05);
+    n1->param("/voxel_grid/z",size_z,0.05);
+    n1->param("/voxel_grid/enable",voxel_grid_enabled,false);
+    n1->param("/pass_through/z_min",z_min,0.0);
+    n1->param("/pass_through/z_max",z_max,1.0);
+    n1->param("/pass_through/enable",pass_through_enabled,true);
+    n1->param("/segmentation/distance_threshold",distance_threshold,0.01);
+    n1->param("/segmentation/enable",segmentation_enabled,true);
+    n1->param("/outlier_removal/meanK",meanK,50);
+    n1->param("/outlier_removal/standard_dev_mult",standard_dev_mult,1.0);
+    n1->param("/outlier_removal/enable",outlier_removal_enabled,true);
+    n1->param("/cluster_extraction/cluster_tolerance",cluster_tolerance,0.02);
+    n1->param("/cluster_extraction/min_cluster_size",min_cluster_size,1000);
+    n1->param("/cluster_extraction/max_cluster_size",max_cluster_size,25000);
+    n1->param("/cluster_extraction/enable",cluster_extraction_enabled,true);
     }
 // Destructor
 Detector::~Detector(){

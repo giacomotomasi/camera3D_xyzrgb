@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-  <param name="/use_sim_time" value="true"/>
+  <rosparam file="$(find realsense_devel)/config/detector.yaml" />
   <node pkg="rosbag" type="play" name="player" output="screen" args="$(find realsense_devel)/bagfiles/rs_pointcloud.bag"/>
   <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find realsense_devel)/rviz/sim_bbox.rviz"/>
   <node name="detector_node" pkg="realsense_devel" type="detector_node" output="screen" />

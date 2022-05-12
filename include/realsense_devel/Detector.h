@@ -22,6 +22,27 @@ private:
     ros::Publisher clusters_pub;
     ros::Subscriber cloud_sub;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
+    // voxel grid parameters
+    double size_x {};
+    double size_y {};
+    double size_z {};
+    bool voxel_grid_enabled;
+    // pass through parameters
+    double z_min {};
+    double z_max {};
+    bool pass_through_enabled;
+    // segmentation parameters
+    double distance_threshold{};
+    bool segmentation_enabled;
+    // outlier removal parameters
+    int meanK {};
+    double standard_dev_mult {};
+    bool outlier_removal_enabled;
+    // cluster extraction parameters
+    double cluster_tolerance {};
+    int min_cluster_size {};
+    int max_cluster_size {};
+    bool cluster_extraction_enabled;
 public:
     void cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg);
     void voxel_grid();
