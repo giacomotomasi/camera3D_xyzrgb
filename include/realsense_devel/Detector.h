@@ -22,6 +22,8 @@ private:
     ros::Publisher clusters_pub;
     ros::Subscriber cloud_sub;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
+    // pointcloud camera topic
+    std::string pointcloud_topic;
     // voxel grid parameters
     double size_x {};
     double size_y {};

@@ -158,14 +158,9 @@ void Detector::publish(){
 // Constructor
 Detector::Detector(ros::NodeHandle *n1){
     std::cout << "\033[1;32m Detector constructor called.\033[0m" << std::endl; // print in green color
-    // Create pointer in the heap
-    cloud = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>);
-    // Create a ROS subscriber for the input point cloud
-    cloud_sub = n1->subscribe ("/camera/depth/color/points", 1, &Detector::cloud_callback, this);
-    // Create a ROS publisher for the filtered point cloud and for the clusters
-    cloud_pub = n1->advertise<pcl::PCLPointCloud2>("pcl_filtered", 1);
-    clusters_pub = n1->advertise<realsense_devel::ClustersArray>("pcl_clusters", 1);
     // get ros parameters
+    n1->param<std::string>("/pointcloud_topic/camera_topic",pointcloud_topic,"/camera/depth/color/points");
+    std::cout << "topic name " << pointcloud_topic << std::endl;
     n1->param("/voxel_grid/x",size_x,0.05);
     n1->param("/voxel_grid/y",size_y,0.05);
     n1->param("/voxel_grid/z",size_z,0.05);
@@ -182,6 +177,13 @@ Detector::Detector(ros::NodeHandle *n1){
     n1->param("/cluster_extraction/min_cluster_size",min_cluster_size,1000);
     n1->param("/cluster_extraction/max_cluster_size",max_cluster_size,25000);
     n1->param("/cluster_extraction/enable",cluster_extraction_enabled,true);
+    // Create pointer in the heap
+    cloud = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>);
+    // Create a ROS subscriber for the input point cloud
+    cloud_sub = n1->subscribe (pointcloud_topic, 1, &Detector::cloud_callback, this);
+    // Create a ROS publisher for the filtered point cloud and for the clusters
+    cloud_pub = n1->advertise<pcl::PCLPointCloud2>("pcl_filtered", 1);
+    clusters_pub = n1->advertise<realsense_devel::ClustersArray>("pcl_clusters", 1);
     }
 // Destructor
 Detector::~Detector(){
