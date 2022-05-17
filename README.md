@@ -24,6 +24,6 @@ roslaunch realsense_devel object_detection.launch
 ![Result in Rviz](https://github.com/giacomotomasi/realsense_devel/blob/main/img/rviz_result.png)
 
 ### To keep in mind
-The processing algorithms are tuned to this specific application example. You need to set proper parameters for your own application. You can change such parameters from #/config/detector.yaml file.
+The processing algorithms are tuned to this specific application example. You need to set proper parameters for your own application. You can change such parameters from */config/detector.yaml* file.
 ### Improvemets
 Further improvement will cover fancier code structure and more filtering algorithms.
