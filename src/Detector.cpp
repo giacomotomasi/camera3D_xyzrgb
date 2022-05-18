@@ -31,6 +31,7 @@
 void Detector::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg){
     // convert cloud to pcl::PointXYZRGB
     pcl::fromROSMsg (*cloud_msg, *cloud);
+    
     if (voxel_grid_enabled)
         Detector::voxel_grid();
     if (pass_through_enabled)
@@ -59,7 +60,12 @@ void Detector::pass_through(){
     // PassThrough
     pcl::PassThrough<pcl::PointXYZRGB> pass;
     pass.setInputCloud (cloud);
-    pass.setFilterFieldName ("z");
+    /* 
+     * x of pcl is z of camera_link
+     * y of pcl is x of camera_link
+     * z of pcl is y of camera_link
+    */
+    pass.setFilterFieldName ("y");
     pass.setFilterLimits (z_min,z_max);
     pass.filter (*cloud);
     }
@@ -134,7 +140,7 @@ void Detector::cluster_extraction(){
         pcl::PCLPointCloud2::Ptr cloud_ros (new pcl::PCLPointCloud2());
         // convert to pcl::PCLPointCloud2
         pcl::toPCLPointCloud2(*cloud_cluster, *cloud_ros);
-        (*cloud_ros).header.frame_id = "camera_depth_optical_frame";
+        (*cloud_ros).header.frame_id = reference_frame;
         ros::Time time_st = ros::Time::now ();
         (*cloud_ros).header.stamp = time_st.toNSec()/1e3;
         sensor_msgs::PointCloud2 output;
@@ -161,6 +167,7 @@ Detector::Detector(ros::NodeHandle *n1){
     // get ros parameters
     n1->param<std::string>("/pointcloud_topic/camera_topic",pointcloud_topic,"/camera/depth/color/points");
     std::cout << "topic name " << pointcloud_topic << std::endl;
+    n1->param<std::string>("/reference_frame/frame_id",reference_frame,"camera_depth_optical_frame");
     n1->param("/voxel_grid/x",size_x,0.05);
     n1->param("/voxel_grid/y",size_y,0.05);
     n1->param("/voxel_grid/z",size_z,0.05);

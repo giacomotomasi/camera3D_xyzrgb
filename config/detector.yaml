@@ -1,6 +1,9 @@
 pointcloud_topic:
     camera_topic: /camera/depth/color/points
-    
+
+reference_frame:
+    frame_id: camera_depth_optical_frame
+
 voxel_grid:
     x: 0.05
     y: 0.05

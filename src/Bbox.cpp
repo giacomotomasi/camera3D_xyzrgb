@@ -66,7 +66,7 @@ std:: tuple<visualization_msgs::Marker, visualization_msgs::Marker> BoundingBox_
     Eigen::Quaternionf quat(rotational_matrix_OBB);
     // create marker correspoinding to the bbox
     visualization_msgs::Marker marker;
-    marker.header.frame_id = "camera_depth_optical_frame";
+    marker.header.frame_id = reference_frame;
     marker.ns = "Obstacle";
     marker.header.stamp = ros::Time::now();
     marker.id = j;
@@ -89,7 +89,7 @@ std:: tuple<visualization_msgs::Marker, visualization_msgs::Marker> BoundingBox_
     marker.color.b = 0;    
     // create TEXT marker
     visualization_msgs::Marker text_marker;
-    text_marker.header.frame_id = "camera_depth_optical_frame";
+    text_marker.header.frame_id = reference_frame;
     std::stringstream obs;
     obs << "Obstacle " << j;
     text_marker.text = obs.str();
@@ -119,6 +119,8 @@ std:: tuple<visualization_msgs::Marker, visualization_msgs::Marker> BoundingBox_
 // Constructor
 BoundingBox_moi::BoundingBox_moi(ros::NodeHandle *n){
     std::cout << "\033[1;32m BoundingBox constructor called.\033[0m" << std::endl;
+    // get ros parameters
+    n->param<std::string>("/reference_frame/frame_id",reference_frame,"camera_depth_optical_frame");
     bbox_pub = n->advertise<visualization_msgs::MarkerArray>("bbox_marker", 1);
     clusters_sub = n->subscribe("pcl_clusters", 1, &BoundingBox_moi::clusters_callback, this);
     }
@@ -165,7 +167,7 @@ std:: tuple<visualization_msgs::Marker, visualization_msgs::Marker> BoundingBox_
     tf_rotation.getRotation(quat);
     // create marker correspoinding to the bbox
     visualization_msgs::Marker marker;
-    marker.header.frame_id = "camera_depth_optical_frame";
+    marker.header.frame_id = reference_frame;
     marker.ns = "Obstacle";
     marker.header.stamp = ros::Time::now();
     marker.id = j;
@@ -188,7 +190,7 @@ std:: tuple<visualization_msgs::Marker, visualization_msgs::Marker> BoundingBox_
     marker.color.b = 0;
     // create TEXT marker
     visualization_msgs::Marker text_marker;
-    text_marker.header.frame_id = "camera_depth_optical_frame";
+    text_marker.header.frame_id = reference_frame;
     std::stringstream obs;
     obs << "Obstacle " << j;
     text_marker.text = obs.str();
@@ -218,15 +220,17 @@ std:: tuple<visualization_msgs::Marker, visualization_msgs::Marker> BoundingBox_
     return {marker, text_marker};
     }
     
-// Constructor
-BoundingBox_pca::BoundingBox_pca(ros::NodeHandle *n){
+    // Constructor
+    BoundingBox_pca::BoundingBox_pca(ros::NodeHandle *n){
     std::cout << "\033[1;32m BoundingBox constructor called.\033[0m" << std::endl;
+    // get ros parameters
+    n->param<std::string>("/reference_frame/frame_id",reference_frame,"camera_depth_optical_frame");
     bbox_pub = n->advertise<visualization_msgs::MarkerArray>("bbox_marker", 1);
     clusters_sub = n->subscribe("pcl_clusters", 1, &BoundingBox_pca::clusters_callback, this);
     }
     
-// Destructor
-BoundingBox_pca::~BoundingBox_pca(){
+    // Destructor
+    BoundingBox_pca::~BoundingBox_pca(){
     std::cout << "\033[1;32m BoundingBox destructor called.\033[0m" << std::endl; 
     }
     

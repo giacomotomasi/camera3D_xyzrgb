@@ -23,6 +23,8 @@ class BoundingBox_moi {
     private:
     ros::Publisher bbox_pub;
     ros::Subscriber clusters_sub;
+    // reference frame
+    std::string reference_frame;
 public:
     void clusters_callback(const realsense_devel::ClustersArray::ConstPtr& clusters_msg);
     // function to find BBOX
@@ -38,6 +40,8 @@ class BoundingBox_pca {
 private:
     ros::Publisher bbox_pub;
     ros::Subscriber clusters_sub;
+    // reference frame
+    std::string reference_frame;
 public:
     void clusters_callback(const realsense_devel::ClustersArray::ConstPtr& clusters_msg);
     // function to find BBOX
