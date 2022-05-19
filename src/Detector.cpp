@@ -65,7 +65,7 @@ void Detector::pass_through(){
      * y of pcl is x of camera_link
      * z of pcl is y of camera_link
     */
-    pass.setFilterFieldName ("y");
+    pass.setFilterFieldName ("z");
     pass.setFilterLimits (z_min,z_max);
     pass.filter (*cloud);
     }

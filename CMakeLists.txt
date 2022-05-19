@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
   tf
   tf_conversions
+  rviz_visual_tools
 )
 
 add_message_files(

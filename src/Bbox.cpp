@@ -23,6 +23,7 @@
 // tf
 #include <tf/tf.h>
 #include "tf_conversions/tf_eigen.h"
+#include <rviz_visual_tools/rviz_visual_tools.h>
 
 #include "realsense_devel/Bbox.h"
 
@@ -39,7 +40,11 @@ void BoundingBox_moi::clusters_callback(const realsense_devel::ClustersArray::Co
         (*bbox_markers).markers.push_back(marker);
         (*bbox_markers).markers.push_back(text_marker);
         }
+    rviz_visual_tools::RvizVisualTools *visual_toolPtr = new rviz_visual_tools::RvizVisualTools("camera_link", "bbox_marker");
+    visual_toolPtr->deleteAllMarkers();
+    delete visual_toolPtr;
     bbox_pub.publish(bbox_markers);
+    
 }
 
 // function to find BBOX
