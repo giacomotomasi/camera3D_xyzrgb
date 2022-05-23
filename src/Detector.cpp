@@ -8,6 +8,7 @@
 #include <iostream>
 #include "ros/ros.h"
 #include "sensor_msgs/PointCloud2.h"
+#include "geometry_msgs/Transform.h"
 // PCL specific includes
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
@@ -28,9 +29,26 @@
 #include <realsense_devel/ClustersArray.h>
 #include "realsense_devel/Detector.h"
 
+#include <tf2_eigen/tf2_eigen.h>
+#include <pcl_ros/transforms.h>
+
+
 void Detector::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg){
+    geometry_msgs::Transform *transform = new geometry_msgs::Transform;
+    transform->translation.x = 0.0;
+    transform->translation.y = 0.0;
+    transform->translation.z = 1.25;
+    transform->rotation.x = 0.0;
+    transform->rotation.y = 0.13917;
+    transform->rotation.z = 0.0;
+    transform->rotation.w = 0.99027;
+    
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_pointcloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+    
     // convert cloud to pcl::PointXYZRGB
-    pcl::fromROSMsg (*cloud_msg, *cloud);
+    pcl::fromROSMsg (*cloud_msg, *trans_pointcloud);
+    
+    pcl_ros::transformPointCloud(*trans_pointcloud, *cloud, *transform);
     
     if (voxel_grid_enabled)
         Detector::voxel_grid();
@@ -46,6 +64,7 @@ void Detector::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
         Detector::outlier_removal();
     
     Detector::publish();
+    delete transform;
     }
     
 void Detector::voxel_grid(){
