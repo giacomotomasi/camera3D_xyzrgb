@@ -43,6 +43,8 @@ void Detector::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     transform->rotation.z = 0.0;
     transform->rotation.w = 0.99027;
     
+    //pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_pointcloud = std::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
+    
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_pointcloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     
     // convert cloud to pcl::PointXYZRGB
