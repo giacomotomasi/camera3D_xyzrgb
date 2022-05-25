@@ -45,3 +45,6 @@ target_link_libraries(detector_node ${catkin_LIBRARIES})
 
 add_executable(bbox_node src/bbox_node.cpp src/Bbox.cpp)
 target_link_libraries(bbox_node ${catkin_LIBRARIES})
+
+add_executable(camera_tf_broadcaster src/camera_tf_broadcaster.cpp)
+target_link_libraries(camera_tf_broadcaster ${catkin_LIBRARIES})
