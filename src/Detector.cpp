@@ -37,15 +37,16 @@ void Detector::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     geometry_msgs::Transform *transform = new geometry_msgs::Transform;
     transform->translation.x = 0.0;
     transform->translation.y = 0.0;
-    transform->translation.z = 1.25;
+    transform->translation.z = 0;
     transform->rotation.x = 0.0;
-    transform->rotation.y = 0.13917;
+    transform->rotation.y = 0.0;
     transform->rotation.z = 0.0;
-    transform->rotation.w = 0.99027;
+    transform->rotation.w = 0.0;
     
     //pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_pointcloud = std::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
     
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_pointcloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+    trans_pointcloud->header.frame_id = "base_link";
     
     // convert cloud to pcl::PointXYZRGB
     pcl::fromROSMsg (*cloud_msg, *trans_pointcloud);
