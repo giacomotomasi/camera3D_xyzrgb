@@ -35,27 +35,31 @@
 
 void Detector::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg){
     geometry_msgs::Transform *transform = new geometry_msgs::Transform;
+    tf::Quaternion q;
+    q.setRPY(roll, pitch, yaw);
+    q = q.normalize();
+
     transform->translation.x = 0.0;
     transform->translation.y = 0.0;
-    transform->translation.z = 0;
-    transform->rotation.x = 0.0;
-    transform->rotation.y = 0.0;
-    transform->rotation.z = 0.0;
-    transform->rotation.w = 0.0;
+    transform->translation.z = 1.45;
     
-    //pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_pointcloud = std::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
+    transform->rotation.x = q.x();
+    transform->rotation.y = q.y();
+    transform->rotation.z = q.z();
+    transform->rotation.w = q.w();
+
     
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_pointcloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    trans_pointcloud->header.frame_id = "base_link";
     
     // convert cloud to pcl::PointXYZRGB
     pcl::fromROSMsg (*cloud_msg, *trans_pointcloud);
+    //trans_pointcloud->header.frame_id = "base_link";
     
     pcl_ros::transformPointCloud(*trans_pointcloud, *cloud, *transform);
     
     if (voxel_grid_enabled)
         Detector::voxel_grid();
-    if (pass_through_enabled)
+    if (x_pass_through_enabled || y_pass_through_enabled || z_pass_through_enabled)
         Detector::pass_through();
     if (segmentation_enabled)
         Detector::segmentation();
@@ -82,14 +86,22 @@ void Detector::pass_through(){
     // PassThrough
     pcl::PassThrough<pcl::PointXYZRGB> pass;
     pass.setInputCloud (cloud);
-    /* 
-     * x of pcl is z of camera_link
-     * y of pcl is x of camera_link
-     * z of pcl is y of camera_link
-    */
-    pass.setFilterFieldName ("z");
-    pass.setFilterLimits (z_min,z_max);
-    pass.filter (*cloud);
+
+    if (x_pass_through_enabled){
+        pass.setFilterFieldName ("x");
+        pass.setFilterLimits (x_min,x_max);
+        pass.filter (*cloud);
+        }
+    if (y_pass_through_enabled){
+        pass.setFilterFieldName ("y");
+        pass.setFilterLimits (y_min,y_max);
+        pass.filter (*cloud);
+        }
+    if (z_pass_through_enabled){
+        pass.setFilterFieldName ("z");
+        pass.setFilterLimits (z_min,z_max);
+        pass.filter (*cloud);
+        }
     }
 
 void Detector::segmentation(){
@@ -179,6 +191,7 @@ void Detector::publish(){
     // reconvert to PointCloud2 to be ROS compatible
     pcl::PCLPointCloud2::Ptr cloud_ros (new pcl::PCLPointCloud2());
     pcl::toPCLPointCloud2(*cloud, *cloud_ros);
+    cloud_ros->header.frame_id = "base_link";
     cloud_pub.publish(cloud_ros);
     //std::cout << "Point Cloud width: %d " << cloud->width << std::endl;
     }
@@ -194,9 +207,15 @@ Detector::Detector(ros::NodeHandle *n1){
     n1->param("/voxel_grid/y",size_y,0.05);
     n1->param("/voxel_grid/z",size_z,0.05);
     n1->param("/voxel_grid/enable",voxel_grid_enabled,false);
+    n1->param("/pass_through/x_min",x_min,0.0);
+    n1->param("/pass_through/x_max",x_max,3.0);
+    n1->param("/pass_through/x_enable",x_pass_through_enabled,true);
+    n1->param("/pass_through/y_min",y_min,-2.0);
+    n1->param("/pass_through/y_max",y_max,2.0);
+    n1->param("/pass_through/y_enable",y_pass_through_enabled,true);
     n1->param("/pass_through/z_min",z_min,0.0);
-    n1->param("/pass_through/z_max",z_max,1.0);
-    n1->param("/pass_through/enable",pass_through_enabled,true);
+    n1->param("/pass_through/z_max",z_max,5.0);
+    n1->param("/pass_through/z_enable",z_pass_through_enabled,false);
     n1->param("/segmentation/distance_threshold",distance_threshold,0.01);
     n1->param("/segmentation/enable",segmentation_enabled,true);
     n1->param("/outlier_removal/meanK",meanK,50);
@@ -206,6 +225,9 @@ Detector::Detector(ros::NodeHandle *n1){
     n1->param("/cluster_extraction/min_cluster_size",min_cluster_size,1000);
     n1->param("/cluster_extraction/max_cluster_size",max_cluster_size,25000);
     n1->param("/cluster_extraction/enable",cluster_extraction_enabled,true);
+    n1->param("/transform/roll",roll,0.0);
+    n1->param("/transform/pitch",pitch,0.0);
+    n1->param("/transform/yaw",yaw,0.0);
     // Create pointer in the heap
     cloud = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>);
     // Create a ROS subscriber for the input point cloud

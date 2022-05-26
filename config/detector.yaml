@@ -2,7 +2,12 @@ pointcloud_topic:
     camera_topic: /camera/depth/color/points
 
 reference_frame:
-    frame_id: camera_depth_optical_frame
+    frame_id: base_link
+    
+transform:
+    roll: -1.849253
+    pitch: 0.0
+    yaw: -1.57
 
 voxel_grid:
     x: 0.02
@@ -11,9 +16,15 @@ voxel_grid:
     enable: false
     
 pass_through:
-    z_min: 0.0
-    z_max: 2.0
-    enable: false
+    x_min: 0.0
+    x_max: 3.0
+    x_enable: true
+    y_min: -2.0
+    y_max: 2.0
+    y_enable: false
+    z_min: 0.15
+    z_max: 3.0
+    z_enable: true
 
 segmentation:
     distance_threshold: 0.01
@@ -22,13 +33,13 @@ segmentation:
 outlier_removal:
     meanK: 50
     standard_dev_mult: 1.0
-    enable: false
+    enable: true
     
 cluster_extraction:
     cluster_tolerance: 0.06
-    min_cluster_size: 10
-    max_cluster_size: 250
-    enable: false
+    min_cluster_size: 500
+    max_cluster_size: 25000
+    enable: true
     
     
     

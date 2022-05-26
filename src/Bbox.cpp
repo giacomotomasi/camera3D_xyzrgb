@@ -40,7 +40,7 @@ void BoundingBox_moi::clusters_callback(const realsense_devel::ClustersArray::Co
         (*bbox_markers).markers.push_back(marker);
         (*bbox_markers).markers.push_back(text_marker);
         }
-    rviz_visual_tools::RvizVisualTools *visual_toolPtr = new rviz_visual_tools::RvizVisualTools("camera_link", "bbox_marker");
+    rviz_visual_tools::RvizVisualTools *visual_toolPtr = new rviz_visual_tools::RvizVisualTools("base_link", "bbox_marker");
     visual_toolPtr->deleteAllMarkers();
     delete visual_toolPtr;
     bbox_pub.publish(bbox_markers);
