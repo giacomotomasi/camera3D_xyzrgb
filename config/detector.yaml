@@ -5,9 +5,14 @@ reference_frame:
     frame_id: base_link
     
 transform:
-    roll: -1.849253
-    pitch: 0.0
-    yaw: -1.57
+    position:
+        x: 0.0
+        y: 0.0
+        z: 1.45
+    orientation:
+        roll: -1.849253
+        pitch: 0.0
+        yaw: -1.57
 
 voxel_grid:
     x: 0.02
