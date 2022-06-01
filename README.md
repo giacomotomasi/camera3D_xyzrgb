@@ -14,6 +14,7 @@ The launch file provides a bag file with a PointCloud used to detect two obstacl
 ```
 roslaunch realsense_devel sim.launch
 ```
+## Note: this example works with obstacle_detection_v1
 ### Real Camera (realsense model)
 Use the package with real camera sensor. It launches the nodes listed above but it replaces data from bag file with camera data.
 ```
@@ -25,5 +26,7 @@ roslaunch realsense_devel object_detection.launch
 
 ### To keep in mind
 The processing algorithms are tuned to this specific application example. You need to set proper parameters for your own application. You can change such parameters from */config/detector.yaml* file.
+
+Also, the last version takes into account a camera mounted on a robot and considers a transform between frames.
 ### Improvemets
 Further improvement will cover fancier code structure and more filtering algorithms.
