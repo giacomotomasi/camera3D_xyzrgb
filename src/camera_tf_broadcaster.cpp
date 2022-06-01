@@ -16,13 +16,6 @@ int main(int argc, char** argv){
     node.param("/transform/orientation/yaw",yaw,0.0);
     
     while (node.ok()){
-//        static tf::TransformBroadcaster br1;
-//        tf::Transform transform1;
-//        transform1.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
-//        tf::Quaternion q1;
-//        q1.setRPY(0, 1.57, -1.57);
-//        transform1.setRotation(q1);
-//        br1.sendTransform(tf::StampedTransform(transform1, ros::Time::now(), "camera_link", "camera_depth_optical_frame"));
         
         static tf::TransformBroadcaster br;
         tf::Transform transform;

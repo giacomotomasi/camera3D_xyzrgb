@@ -75,6 +75,10 @@ void Detector::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     }
     
 void Detector::voxel_grid(){
+    if (cloud->size() == 0){
+        std::cout << "Empty PointCloud, skipping this step!" << std::endl;
+        return;
+    }
     // VoxelGrid
     pcl::VoxelGrid<pcl::PointXYZRGB> voxel_grid;
     voxel_grid.setInputCloud (cloud);
@@ -83,6 +87,10 @@ void Detector::voxel_grid(){
     }
 
 void Detector::pass_through(){
+    if (cloud->size() == 0){
+        std::cout << "Empty PointCloud, skipping this step!" << std::endl;
+        return;
+    }
     // PassThrough
     pcl::PassThrough<pcl::PointXYZRGB> pass;
     pass.setInputCloud (cloud);
@@ -105,6 +113,10 @@ void Detector::pass_through(){
     }
 
 void Detector::segmentation(){
+    if (cloud->size() == 0){
+        std::cout << "Empty PointCloud, skipping this step!" << std::endl;
+        return;
+    }
     // Segmentation
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr indices (new pcl::PointIndices);
@@ -126,6 +138,10 @@ void Detector::segmentation(){
     }
   
 void Detector::extract_indices(pcl::PointIndices::Ptr indices, bool mode){
+    if (cloud->size() == 0){
+        std::cout << "Empty PointCloud, skipping this step!" << std::endl;
+        return;
+    }
     // Create the filtering object
     pcl::ExtractIndices<pcl::PointXYZRGB> extract;
     extract.setInputCloud(cloud);
@@ -135,6 +151,10 @@ void Detector::extract_indices(pcl::PointIndices::Ptr indices, bool mode){
     }
     
 void Detector::outlier_removal(){
+    if (cloud->size() == 0){
+        std::cout << "Empty PointCloud, skipping this step!" << std::endl;
+        return;
+    }
     // Outlier removal
     pcl::StatisticalOutlierRemoval<pcl::PointXYZRGB> sor;
     sor.setInputCloud(cloud);
@@ -144,6 +164,10 @@ void Detector::outlier_removal(){
     }
     
 void Detector::cluster_extraction(){
+    if (cloud->size() == 0){
+        std::cout << "Empty PointCloud, skipping this step!" << std::endl;
+        return;
+    }
     // Creating the KdTree object for the search method of the extraction
     pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGB>);
     tree->setInputCloud(cloud);
