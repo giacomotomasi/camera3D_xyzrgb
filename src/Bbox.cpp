@@ -9,6 +9,8 @@
 
 #include<ros/ros.h>
 #include<realsense_devel/ClustersArray.h>
+#include<realsense_devel/BoundingBox3DArray.h>
+#include<realsense_devel/BoundingBox3D.h>
 #include<sensor_msgs/PointCloud2.h>
 // PCL specific includes
 #include <pcl_conversions/pcl_conversions.h>

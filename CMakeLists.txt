@@ -21,6 +21,7 @@ add_message_files(
   FILES
   ClustersArray.msg
   BoundingBox3D.msg
+  BoundingBox3DArray.msg
 )
 
 generate_messages(
