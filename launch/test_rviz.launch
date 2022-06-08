@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node name="rviz1" pkg="rviz" type="rviz" output="screen" args="-d $(find realsense_devel)/rviz/husky_test_obs.rviz"/>
+    <node name="rviz2" pkg="rviz" type="rviz" output="screen" args="-d $(find realsense_devel)/rviz/husky_test_camera.rviz"/>
+    
+</launch> 
