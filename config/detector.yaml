@@ -45,7 +45,3 @@ cluster_extraction:
     min_cluster_size: 500
     max_cluster_size: 25000
     enable: true
-    
-    
-    
-

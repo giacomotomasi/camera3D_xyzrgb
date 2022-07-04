@@ -42,16 +42,19 @@ void BoundingBox_moi::clusters_callback(const realsense_devel::ClustersArray::Co
         realsense_devel::BoundingBox3D bbox;
         //tie(marker, text_marker) = getBBox(cloud, i);
         BoundingBox_moi::getBBox(cloud, i, marker, text_marker, bbox);
-        (*bbox_markers).markers.push_back(marker);
-        (*bbox_markers).markers.push_back(text_marker);
+        bbox_markers->markers.push_back(marker);
+        bbox_markers->markers.push_back(text_marker);
         bbox_array.bboxes.push_back(bbox);
         }
-//    rviz_visual_tools::RvizVisualTools *visual_toolPtr = new rviz_visual_tools::RvizVisualTools("base_link", "bbox_marker");
-//    visual_toolPtr->deleteAllMarkers();
-//    delete visual_toolPtr;
+    // delete all markers
+    visualization_msgs::MarkerArray::Ptr delete_markers (new visualization_msgs::MarkerArray);
+    visualization_msgs::Marker del_marker;
+    del_marker.header.frame_id = reference_frame;    
+    del_marker.action = visualization_msgs::Marker::DELETEALL;
+    delete_markers->markers.push_back(del_marker);
+    bbox_markers_pub.publish(delete_markers);
     bbox_markers_pub.publish(bbox_markers);
     bbox_pub.publish(bbox_array);
-    (*bbox_markers).markers.clear();
 }
 
 // function to find BBOX
@@ -75,17 +78,6 @@ void BoundingBox_moi::getBBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster, in
     feature_extractor.getEigenVectors(major_vector, middle_vector, minor_vector);
     feature_extractor.getMassCenter(mass_center);
     Eigen::Quaternionf quat(rotational_matrix_OBB);
-    // create BoungingBox 3D
-//    bbox.center.position.x = position_OBB.x;
-//    bbox.center.position.y = position_OBB.y;
-//    bbox.center.position.z = position_OBB.z;
-//    bbox.center.orientation.x = quat.x();
-//    bbox.center.orientation.y = quat.y();
-//    bbox.center.orientation.z = quat.z();
-//    bbox.center.orientation.w = quat.w();
-//    bbox.size.x = max_point_OBB.x - min_point_OBB.x + 0.02;
-//    bbox.size.y = max_point_OBB.y - min_point_OBB.y + 0.02;
-//    bbox.size.z = max_point_OBB.z - min_point_OBB.z + 0.02;
     // create marker correspoinding to the bbox
     //visualization_msgs::Marker marker;
     marker.header.frame_id = reference_frame;
@@ -137,7 +129,10 @@ void BoundingBox_moi::getBBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster, in
     text_marker.color.b = 0;
     
     bbox.center = marker.pose;
-    bbox.size = marker.scale;
+    //bbox.size = marker.scale;
+    bbox.size.x = max_point_OBB.x - min_point_OBB.x;
+    bbox.size.y = max_point_OBB.y - min_point_OBB.y;
+    bbox.size.z = max_point_OBB.z - min_point_OBB.z;
     }
     
 // Constructor
