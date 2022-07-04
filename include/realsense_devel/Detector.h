@@ -15,6 +15,9 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
+#include<realsense_devel/BoundingBox3DArray.h>
+#include<nav_msgs/Odometry.h>
+#include <tf/transform_listener.h>
 
 class Detector {
 private:
@@ -22,10 +25,12 @@ private:
     ros::Publisher clusters_pub;
     ros::Subscriber cloud_sub;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
+    tf::TransformListener tf_listener;
     // pointcloud camera topic
     std::string pointcloud_topic;
     // reference frame
     std::string reference_frame;
+    std::string fixed_frame;
     // voxel grid parameters
     double size_x {};
     double size_y {};

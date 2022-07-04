@@ -19,15 +19,17 @@
 #include <pcl/features/moment_of_inertia_estimation.h>
 #include <pcl/common/pca.h>
 #include <pcl/common/common.h>
+#include <pcl_ros/transforms.h>
 // Markers
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 // tf
 #include <tf/tf.h>
-#include "tf_conversions/tf_eigen.h"
+#include <tf_conversions/tf_eigen.h>
 #include <rviz_visual_tools/rviz_visual_tools.h>
 
-#include "realsense_devel/Bbox.h"
+#include <realsense_devel/Bbox.h>
+#include <tf/transform_listener.h>
 
 
 void BoundingBox_moi::clusters_callback(const realsense_devel::ClustersArray::ConstPtr& clusters_msg){
@@ -40,7 +42,6 @@ void BoundingBox_moi::clusters_callback(const realsense_devel::ClustersArray::Co
         pcl::fromROSMsg((*clusters_msg).clusters.at(i), *cloud);
         visualization_msgs::Marker marker, text_marker;
         realsense_devel::BoundingBox3D bbox;
-        //tie(marker, text_marker) = getBBox(cloud, i);
         BoundingBox_moi::getBBox(cloud, i, marker, text_marker, bbox);
         bbox_markers->markers.push_back(marker);
         bbox_markers->markers.push_back(text_marker);
@@ -59,28 +60,44 @@ void BoundingBox_moi::clusters_callback(const realsense_devel::ClustersArray::Co
 
 // function to find BBOX
 void BoundingBox_moi::getBBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster, int j, visualization_msgs::Marker &marker, visualization_msgs::Marker &text_marker, realsense_devel::BoundingBox3D &bbox){
+        
+    tf::Transform transform;
+    tf::StampedTransform transformStamped;
+    // wait for transform
+    tf_listener.waitForTransform("map", cluster->header.frame_id, ros::Time(0), ros::Duration(10.0));
+    // get transform
+    tf_listener.lookupTransform("map", cluster->header.frame_id, ros::Time(0), transformStamped);
+    transform.setOrigin(transformStamped.getOrigin());
+    transform.setRotation(transformStamped.getRotation());
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr map_cluster (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl_ros::transformPointCloud(*cluster, *map_cluster, transform);
+    //std::cout << "\033[1;32m map cluster size \033[0m " << map_cluster->size() << std::endl;
+    
     pcl::MomentOfInertiaEstimation<pcl::PointXYZRGB> feature_extractor;
-    feature_extractor.setInputCloud(cluster);
+    feature_extractor.setInputCloud(map_cluster);
     feature_extractor.compute();
     std::vector<float> moment_of_inertia;
     std::vector<float> eccentricity;
     pcl::PointXYZRGB min_point_OBB;
     pcl::PointXYZRGB max_point_OBB;
+    pcl::PointXYZRGB min_point_AABB;
+    pcl::PointXYZRGB max_point_AABB;
     pcl::PointXYZRGB position_OBB;
     Eigen::Matrix3f rotational_matrix_OBB;
+    //Eigen::Matrix3f rotational_matrix_OBB.eulerAngles(0, 0, yaw);
     float major_value, middle_value, minor_value;
     Eigen::Vector3f major_vector, middle_vector, minor_vector;
     Eigen::Vector3f mass_center;
     feature_extractor.getMomentOfInertia(moment_of_inertia);
     feature_extractor.getEccentricity(eccentricity);
+    feature_extractor.getAABB(min_point_AABB, max_point_AABB);
     feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
     feature_extractor.getEigenValues(major_value, middle_value, minor_value);
     feature_extractor.getEigenVectors(major_vector, middle_vector, minor_vector);
     feature_extractor.getMassCenter(mass_center);
     Eigen::Quaternionf quat(rotational_matrix_OBB);
     // create marker correspoinding to the bbox
-    //visualization_msgs::Marker marker;
-    marker.header.frame_id = reference_frame;
+    marker.header.frame_id = fixed_frame;
     marker.ns = "Obstacle";
     marker.header.stamp = ros::Time::now();
     marker.id = j;
@@ -90,20 +107,42 @@ void BoundingBox_moi::getBBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster, in
     marker.pose.position.x = position_OBB.x;
     marker.pose.position.y = position_OBB.y;
     marker.pose.position.z = position_OBB.z;
-    marker.pose.orientation.x = quat.x();
-    marker.pose.orientation.y = quat.y();
-    marker.pose.orientation.z = quat.z();
-    marker.pose.orientation.w = quat.w();
-    marker.scale.x = max_point_OBB.x - min_point_OBB.x + 0.02;
-    marker.scale.y = max_point_OBB.y - min_point_OBB.y + 0.02;
-    marker.scale.z = max_point_OBB.z - min_point_OBB.z + 0.02;
+    if (oriented){
+        marker.scale.x = max_point_OBB.x - min_point_OBB.x + offset;
+        marker.scale.y = max_point_OBB.y - min_point_OBB.y + offset;
+        marker.scale.z = max_point_OBB.z - min_point_OBB.z + offset;
+        marker.pose.orientation.x = quat.x();
+        marker.pose.orientation.y = quat.y();
+        marker.pose.orientation.z = quat.z();
+        marker.pose.orientation.w = quat.w();
+        // BoundingBox msg
+        bbox.center = marker.pose;
+        //bbox.size = marker.scale;
+        bbox.size.x = max_point_OBB.x - min_point_OBB.x;
+        bbox.size.y = max_point_OBB.y - min_point_OBB.y;
+        bbox.size.z = max_point_OBB.z - min_point_OBB.z;
+        } else {
+            marker.scale.x = max_point_AABB.x - min_point_AABB.x + offset;
+            marker.scale.y = max_point_AABB.y - min_point_AABB.y + offset;
+            marker.scale.z = max_point_AABB.z - min_point_AABB.z + offset;
+            marker.pose.orientation.x = 0;
+            marker.pose.orientation.y = 0;
+            marker.pose.orientation.z = 0;
+            marker.pose.orientation.w = 1;
+            // BoundingBox msg
+            bbox.center = marker.pose;
+            //bbox.size = marker.scale;
+            bbox.size.x = max_point_AABB.x - min_point_AABB.x;
+            bbox.size.y = max_point_AABB.y - min_point_AABB.y;
+            bbox.size.z = max_point_AABB.z - min_point_AABB.z;
+            }
+            
     marker.color.a = 0.15;
     marker.color.r = 1.0;
     marker.color.g = 0.0;
     marker.color.b = 0;    
     // create TEXT marker
-    //visualization_msgs::Marker text_marker;
-    text_marker.header.frame_id = reference_frame;
+    text_marker.header.frame_id = fixed_frame;
     std::stringstream obs;
     obs << "Obstacle " << j;
     text_marker.text = obs.str();
@@ -128,11 +167,6 @@ void BoundingBox_moi::getBBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster, in
     text_marker.color.g = 0.0;
     text_marker.color.b = 0;
     
-    bbox.center = marker.pose;
-    //bbox.size = marker.scale;
-    bbox.size.x = max_point_OBB.x - min_point_OBB.x;
-    bbox.size.y = max_point_OBB.y - min_point_OBB.y;
-    bbox.size.z = max_point_OBB.z - min_point_OBB.z;
     }
     
 // Constructor
@@ -140,6 +174,9 @@ BoundingBox_moi::BoundingBox_moi(ros::NodeHandle *n){
     std::cout << "\033[1;32m BoundingBox constructor called.\033[0m" << std::endl;
     // get ros parameters
     n->param<std::string>("/reference_frame/frame_id",reference_frame,"camera_depth_optical_frame");
+    n->param<std::string>("/fixed_frame/frame_id",fixed_frame,"odom");
+    n->param("/boundingbox/oriented",oriented,false);
+    n->param("/boundingbox/offset",offset,0.02);
     bbox_pub = n->advertise<realsense_devel::BoundingBox3DArray>("boundingBoxArray", 1);
     bbox_markers_pub = n->advertise<visualization_msgs::MarkerArray>("bbox_marker", 1);
     clusters_sub = n->subscribe("pcl_clusters", 1, &BoundingBox_moi::clusters_callback, this);
@@ -149,129 +186,4 @@ BoundingBox_moi::BoundingBox_moi(ros::NodeHandle *n){
 BoundingBox_moi::~BoundingBox_moi(){
     std::cout << "\033[1;32m BoundingBox destructor called.\033[0m" << std::endl; 
     };
-    
-    
-    
-void BoundingBox_pca::clusters_callback(const realsense_devel::ClustersArray::ConstPtr& clusters_msg){
-    visualization_msgs::MarkerArray::Ptr bbox_markers (new visualization_msgs::MarkerArray);
-    realsense_devel::BoundingBox3DArray bbox_array;
-    //std::cout << (*clusters_msg).clusters.size() << std::endl;
-    for (int i {0};i<(*clusters_msg).clusters.size();i++){
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-        // convert cloud to pcl::PointXYZRGB
-        pcl::fromROSMsg((*clusters_msg).clusters.at(i), *cloud);
-        visualization_msgs::Marker marker, text_marker;
-        realsense_devel::BoundingBox3D bbox;
-        //tie(marker, text_marker) = getBBox(cloud, i);
-        BoundingBox_pca::getBBox(cloud, i, marker, text_marker, bbox);
-        (*bbox_markers).markers.push_back(marker);
-        (*bbox_markers).markers.push_back(text_marker);
-        bbox_array.bboxes.push_back(bbox);
-    bbox_markers_pub.publish(bbox_markers);
-    }
-//    rviz_visual_tools::RvizVisualTools *visual_toolPtr = new rviz_visual_tools::RvizVisualTools("base_link", "bbox_marker");
-//    visual_toolPtr->deleteAllMarkers();
-//    delete visual_toolPtr;
-    bbox_markers_pub.publish(bbox_markers);
-    bbox_pub.publish(bbox_array);
-    
-    (*bbox_markers).markers.clear();
-}
-
-// function to find BBOX
-void BoundingBox_pca::getBBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster, int j, visualization_msgs::Marker &marker, visualization_msgs::Marker &text_marker, realsense_devel::BoundingBox3D &bbox){
-
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::PCA<pcl::PointXYZRGB> pca;
-    pca.setInputCloud(cluster);
-    pca.project(*cluster, *projected_cloud);
-    Eigen::Matrix3f eigen_vector_pca = pca.getEigenVectors();
-    Eigen::Vector3f eigen_values = pca.getEigenValues();
-    Eigen::Matrix3d eigen_vector_pca_double = eigen_vector_pca.cast<double>();
-    pcl::PointXYZRGB min_point, max_point;
-    pcl::getMinMax3D(*projected_cloud, min_point, max_point);
-    Eigen::Vector4f cluster_centroid;
-    pcl::compute3DCentroid(*cluster, cluster_centroid);
-    tf::Quaternion quat;
-    tf::Matrix3x3 tf_rotation;
-    tf::matrixEigenToTF(eigen_vector_pca_double, tf_rotation);
-    tf_rotation.getRotation(quat);
-    // create BoungingBox 3D
-    bbox.center.position.x = cluster_centroid(0);
-    bbox.center.position.y = cluster_centroid(1);
-    bbox.center.position.z = cluster_centroid(2);
-    bbox.center.orientation.x = quat.getAxis().getX();
-    bbox.center.orientation.y = quat.getAxis().getY();
-    bbox.center.orientation.z = quat.getAxis().getZ();
-    bbox.center.orientation.w = quat.getW();
-    bbox.size.x = max_point.x - min_point.x + 0.02;
-    bbox.size.y = max_point.y - min_point.y + 0.02;
-    bbox.size.z = max_point.z - min_point.z + 0.02;
-    // create marker correspoinding to the bbox
-    marker.header.frame_id = reference_frame;
-    marker.ns = "Obstacle";
-    marker.header.stamp = ros::Time::now();
-    marker.id = j;
-    marker.type = visualization_msgs::Marker::CUBE;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.lifetime = ros::Duration(0);
-    marker.pose.position.x = cluster_centroid(0);
-    marker.pose.position.y = cluster_centroid(1);
-    marker.pose.position.z = cluster_centroid(2);
-    marker.pose.orientation.x = quat.getAxis().getX();
-    marker.pose.orientation.y = quat.getAxis().getY();
-    marker.pose.orientation.z = quat.getAxis().getZ();
-    marker.pose.orientation.w = quat.getW();
-    marker.scale.x = max_point.x - min_point.x;
-    marker.scale.y = max_point.y - min_point.y;
-    marker.scale.z = max_point.z - min_point.z;
-    marker.color.a = 0.15;
-    marker.color.r = 1.0;
-    marker.color.g = 0.0;
-    marker.color.b = 0;
-    // create TEXT marker
-    text_marker.header.frame_id = reference_frame;
-    std::stringstream obs;
-    obs << "Obstacle " << j;
-    text_marker.text = obs.str();
-    text_marker.ns = "Obstacle";
-    text_marker.header.stamp = ros::Time::now();
-    text_marker.id = j+100;
-    text_marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-    text_marker.action = visualization_msgs::Marker::ADD;
-    text_marker.lifetime = ros::Duration(0);
-    text_marker.pose.position.x = cluster_centroid(0);
-    text_marker.pose.position.y = cluster_centroid(1) - ((max_point.x - min_point.x)/2 + 0.04);;
-    text_marker.pose.position.z = cluster_centroid(2);
-    text_marker.pose.orientation.x = quat.getAxis().getX();
-    text_marker.pose.orientation.y = quat.getAxis().getY();
-    text_marker.pose.orientation.z = quat.getAxis().getZ();
-    text_marker.pose.orientation.w = quat.getW();
-    text_marker.scale.x = max_point.x - min_point.x;
-    text_marker.scale.y = max_point.y - min_point.y;
-    text_marker.scale.z = max_point.z - min_point.z;
-    text_marker.scale.x = 0.04;
-    text_marker.scale.y = 0.04;
-    text_marker.scale.z = 0.04;
-    text_marker.color.a = 1.0;
-    text_marker.color.r = 1.0;
-    text_marker.color.g = 0.0;
-    text_marker.color.b = 0;
-    
-    }
-    
-    // Constructor
-    BoundingBox_pca::BoundingBox_pca(ros::NodeHandle *n){
-    std::cout << "\033[1;32m BoundingBox constructor called.\033[0m" << std::endl;
-    // get ros parameters
-    n->param<std::string>("/reference_frame/frame_id",reference_frame,"camera_depth_optical_frame");
-    bbox_pub = n->advertise<realsense_devel::BoundingBox3DArray>("boundingBoxArray", 1);
-    bbox_markers_pub = n->advertise<visualization_msgs::MarkerArray>("bbox_marker", 1);
-    clusters_sub = n->subscribe("pcl_clusters", 1, &BoundingBox_pca::clusters_callback, this);
-    }
-    
-    // Destructor
-    BoundingBox_pca::~BoundingBox_pca(){
-    std::cout << "\033[1;32m BoundingBox destructor called.\033[0m" << std::endl; 
-    }
     

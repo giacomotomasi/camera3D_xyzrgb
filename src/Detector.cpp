@@ -28,34 +28,30 @@
 
 #include <realsense_devel/ClustersArray.h>
 #include "realsense_devel/Detector.h"
+#include <realsense_devel/BoundingBox3DArray.h>
+#include <nav_msgs/Odometry.h>
 
 #include <tf2_eigen/tf2_eigen.h>
 #include <pcl_ros/transforms.h>
+#include <tf/transform_listener.h>
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Detector::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg){
-    geometry_msgs::Transform *transform = new geometry_msgs::Transform;
-    tf::Quaternion q;
-    q.setRPY(roll, pitch, yaw);
-    q = q.normalize();
+    //geometry_msgs::Transform transform;
+    tf::Transform transform;
+    tf::StampedTransform transformStamped;
+    // wait for transform
+    tf_listener.waitForTransform("base_footprint", "camera_link", cloud_msg->header.stamp, ros::Duration(10.0));
+    // get transform
+    tf_listener.lookupTransform("base_footprint", "camera_link", ros::Time(0), transformStamped);
+    transform.setOrigin(transformStamped.getOrigin());
+    transform.setRotation(transformStamped.getRotation());
 
-    transform->translation.x = x;
-    transform->translation.y = y;
-    transform->translation.z = z;
-    
-    transform->rotation.x = q.x();
-    transform->rotation.y = q.y();
-    transform->rotation.z = q.z();
-    transform->rotation.w = q.w();
-
-    
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_pointcloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    
     // convert cloud to pcl::PointXYZRGB
-    pcl::fromROSMsg (*cloud_msg, *trans_pointcloud);
-    //trans_pointcloud->header.frame_id = "base_link";
-    
-    pcl_ros::transformPointCloud(*trans_pointcloud, *cloud, *transform);
+    pcl::fromROSMsg(*cloud_msg, *trans_pointcloud);
+    pcl_ros::transformPointCloud(*trans_pointcloud, *cloud, transform);
+    //pcl_ros::transformPointCloud("map",*trans_pointcloud, *cloud, tf_listener);
     
     if (voxel_grid_enabled)
         Detector::voxel_grid();
@@ -71,9 +67,8 @@ void Detector::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
         Detector::outlier_removal();
     
     Detector::publish();
-    delete transform;
     }
-    
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
 void Detector::voxel_grid(){
     if (cloud->size() == 0){
         std::cout << "Empty PointCloud, skipping this step!" << std::endl;
@@ -85,7 +80,8 @@ void Detector::voxel_grid(){
     voxel_grid.setLeafSize (size_x,size_y,size_z);
     voxel_grid.filter (*cloud);
     }
-
+    
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Detector::pass_through(){
     if (cloud->size() == 0){
         std::cout << "Empty PointCloud, skipping this step!" << std::endl;
@@ -111,7 +107,8 @@ void Detector::pass_through(){
         pass.filter (*cloud);
         }
     }
-
+    
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Detector::segmentation(){
     if (cloud->size() == 0){
         std::cout << "Empty PointCloud, skipping this step!" << std::endl;
@@ -136,7 +133,8 @@ void Detector::segmentation(){
         Detector::extract_indices(indices, true);
         }
     }
-  
+    
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
 void Detector::extract_indices(pcl::PointIndices::Ptr indices, bool mode){
     if (cloud->size() == 0){
         std::cout << "Empty PointCloud, skipping this step!" << std::endl;
@@ -150,6 +148,7 @@ void Detector::extract_indices(pcl::PointIndices::Ptr indices, bool mode){
     extract.filter(*cloud);
     }
     
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
 void Detector::outlier_removal(){
     if (cloud->size() == 0){
         std::cout << "Empty PointCloud, skipping this step!" << std::endl;
@@ -163,6 +162,7 @@ void Detector::outlier_removal(){
     sor.filter(*cloud);
     }
     
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
 void Detector::cluster_extraction(){
     if (cloud->size() == 0){
         std::cout << "Empty PointCloud, skipping this step!" << std::endl;
@@ -211,11 +211,12 @@ void Detector::cluster_extraction(){
         clusters_pub.publish(clusters_array);
     }
     
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
 void Detector::publish(){
     // reconvert to PointCloud2 to be ROS compatible
     pcl::PCLPointCloud2::Ptr cloud_ros (new pcl::PCLPointCloud2());
     pcl::toPCLPointCloud2(*cloud, *cloud_ros);
-    cloud_ros->header.frame_id = "base_link";
+    cloud_ros->header.frame_id = reference_frame;
     cloud_pub.publish(cloud_ros);
     //std::cout << "Point Cloud width: %d " << cloud->width << std::endl;
     }
@@ -225,8 +226,8 @@ Detector::Detector(ros::NodeHandle *n1){
     std::cout << "\033[1;32m Detector constructor called.\033[0m" << std::endl; // print in green color
     // get ros parameters
     n1->param<std::string>("/pointcloud_topic/camera_topic",pointcloud_topic,"/camera/depth/color/points");
-    std::cout << "topic name " << pointcloud_topic << std::endl;
-    n1->param<std::string>("/reference_frame/frame_id",reference_frame,"camera_depth_optical_frame");
+    n1->param<std::string>("/reference_frame/frame_id",reference_frame,"base_link");
+    n1->param<std::string>("/fixed_frame/frame_id",fixed_frame,"odom");
     n1->param("/voxel_grid/x",size_x,0.05);
     n1->param("/voxel_grid/y",size_y,0.05);
     n1->param("/voxel_grid/z",size_z,0.05);
@@ -238,7 +239,7 @@ Detector::Detector(ros::NodeHandle *n1){
     n1->param("/pass_through/y_max",y_max,2.0);
     n1->param("/pass_through/y_enable",y_pass_through_enabled,true);
     n1->param("/pass_through/z_min",z_min,0.0);
-    n1->param("/pass_through/z_max",z_max,5.0);
+    n1->param("/pass_through/z_max",z_max,3.0);
     n1->param("/pass_through/z_enable",z_pass_through_enabled,false);
     n1->param("/segmentation/distance_threshold",distance_threshold,0.01);
     n1->param("/segmentation/enable",segmentation_enabled,true);
