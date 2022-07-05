@@ -8,9 +8,9 @@
 #ifndef _DETECTOR_H_
 #define _DETECTOR_H_
 
-#include<iostream>
+#include <iostream>
 #include "ros/ros.h"
-#include<realsense_devel/ClustersArray.h>
+#include <camera3d_xyzrgb/ClustersArray.h>
 // PCL specific includes
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -18,7 +18,7 @@
 // Markers
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include<realsense_devel/BoundingBox3D.h>
+#include <camera3d_xyzrgb/BoundingBox3D.h>
 
 #include <tf2_eigen/tf2_eigen.h>
 #include <pcl_ros/transforms.h>
@@ -36,9 +36,9 @@ class BoundingBox_moi {
     bool oriented;
     double offset;
 public:
-    void clusters_callback(const realsense_devel::ClustersArray::ConstPtr& clusters_msg);
+    void clusters_callback(const camera3d_xyzrgb::ClustersArray::ConstPtr& clusters_msg);
     // function to find BBOX
-    void getBBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster, int j, visualization_msgs::Marker &marker, visualization_msgs::Marker &text_marker, realsense_devel::BoundingBox3D &bbox);
+    void getBBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster, int j, visualization_msgs::Marker &marker, visualization_msgs::Marker &text_marker, camera3d_xyzrgb::BoundingBox3D &bbox);
     // Constructor
     BoundingBox_moi(ros::NodeHandle *n);
     // Destructor

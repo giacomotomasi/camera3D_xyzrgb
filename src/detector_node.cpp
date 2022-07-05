@@ -7,7 +7,7 @@
  
 #include <iostream>
 #include "ros/ros.h"
-#include "realsense_devel/Detector.h"
+#include "camera3d_xyzrgb/Detector.h"
 
 int main(int argc, char** argv) {
     // Initialize ROS

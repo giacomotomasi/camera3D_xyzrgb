@@ -26,9 +26,9 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/kdtree/kdtree.h>
 
-#include <realsense_devel/ClustersArray.h>
-#include "realsense_devel/Detector.h"
-#include <realsense_devel/BoundingBox3DArray.h>
+#include <camera3d_xyzrgb/ClustersArray.h>
+#include "camera3d_xyzrgb/Detector.h"
+#include <camera3d_xyzrgb/BoundingBox3DArray.h>
 #include <nav_msgs/Odometry.h>
 
 #include <tf2_eigen/tf2_eigen.h>
@@ -180,7 +180,7 @@ void Detector::cluster_extraction(){
     ec.setSearchMethod(tree);
     ec.setInputCloud(cloud);
     ec.extract(cluster_indices);
-    realsense_devel::ClustersArray clusters_array;
+    camera3d_xyzrgb::ClustersArray clusters_array;
     
     // Now we extracted the clusters out of our point cloud and saved the indices in cluster_indices. 
     // To separate each cluster out of the vector<PointIndices> we have to iterate through cluster_indices, 
@@ -262,7 +262,7 @@ Detector::Detector(ros::NodeHandle *n1){
     cloud_sub = n1->subscribe (pointcloud_topic, 1, &Detector::cloud_callback, this);
     // Create a ROS publisher for the filtered point cloud and for the clusters
     cloud_pub = n1->advertise<pcl::PCLPointCloud2>("pcl_filtered", 1);
-    clusters_pub = n1->advertise<realsense_devel::ClustersArray>("pcl_clusters", 1);
+    clusters_pub = n1->advertise<camera3d_xyzrgb::ClustersArray>("pcl_clusters", 1);
     }
 // Destructor
 Detector::~Detector(){

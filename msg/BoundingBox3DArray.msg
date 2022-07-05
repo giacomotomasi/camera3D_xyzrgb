@@ -1,1 +1,1 @@
-realsense_devel/BoundingBox3D[] bboxes
+camera3d_xyzrgb/BoundingBox3D[] bboxes

@@ -8,9 +8,9 @@
 #include<iostream>
 
 #include<ros/ros.h>
-#include<realsense_devel/ClustersArray.h>
-#include<realsense_devel/BoundingBox3DArray.h>
-#include<realsense_devel/BoundingBox3D.h>
+#include<camera3d_xyzrgb/ClustersArray.h>
+#include<camera3d_xyzrgb/BoundingBox3DArray.h>
+#include<camera3d_xyzrgb/BoundingBox3D.h>
 #include<sensor_msgs/PointCloud2.h>
 // PCL specific includes
 #include <pcl_conversions/pcl_conversions.h>
@@ -28,20 +28,20 @@
 #include <tf_conversions/tf_eigen.h>
 #include <rviz_visual_tools/rviz_visual_tools.h>
 
-#include <realsense_devel/Bbox.h>
+#include <camera3d_xyzrgb/Bbox.h>
 #include <tf/transform_listener.h>
 
 
-void BoundingBox_moi::clusters_callback(const realsense_devel::ClustersArray::ConstPtr& clusters_msg){
+void BoundingBox_moi::clusters_callback(const camera3d_xyzrgb::ClustersArray::ConstPtr& clusters_msg){
     visualization_msgs::MarkerArray::Ptr bbox_markers (new visualization_msgs::MarkerArray);
-    realsense_devel::BoundingBox3DArray bbox_array;
+    camera3d_xyzrgb::BoundingBox3DArray bbox_array;
     //std::cout << (*clusters_msg).clusters.size() << std::endl;
     for (int i {0};i<(*clusters_msg).clusters.size();i++){
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
         // convert cloud to pcl::PointXYZRGB
         pcl::fromROSMsg((*clusters_msg).clusters.at(i), *cloud);
         visualization_msgs::Marker marker, text_marker;
-        realsense_devel::BoundingBox3D bbox;
+        camera3d_xyzrgb::BoundingBox3D bbox;
         BoundingBox_moi::getBBox(cloud, i, marker, text_marker, bbox);
         bbox_markers->markers.push_back(marker);
         bbox_markers->markers.push_back(text_marker);
@@ -59,7 +59,7 @@ void BoundingBox_moi::clusters_callback(const realsense_devel::ClustersArray::Co
 }
 
 // function to find BBOX
-void BoundingBox_moi::getBBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster, int j, visualization_msgs::Marker &marker, visualization_msgs::Marker &text_marker, realsense_devel::BoundingBox3D &bbox){
+void BoundingBox_moi::getBBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster, int j, visualization_msgs::Marker &marker, visualization_msgs::Marker &text_marker, camera3d_xyzrgb::BoundingBox3D &bbox){
         
     tf::Transform transform;
     tf::StampedTransform transformStamped;
@@ -177,7 +177,7 @@ BoundingBox_moi::BoundingBox_moi(ros::NodeHandle *n){
     n->param<std::string>("/fixed_frame/frame_id",fixed_frame,"odom");
     n->param("/boundingbox/oriented",oriented,false);
     n->param("/boundingbox/offset",offset,0.02);
-    bbox_pub = n->advertise<realsense_devel::BoundingBox3DArray>("boundingBoxArray", 1);
+    bbox_pub = n->advertise<camera3d_xyzrgb::BoundingBox3DArray>("boundingBoxArray", 1);
     bbox_markers_pub = n->advertise<visualization_msgs::MarkerArray>("bbox_marker", 1);
     clusters_sub = n->subscribe("pcl_clusters", 1, &BoundingBox_moi::clusters_callback, this);
     }

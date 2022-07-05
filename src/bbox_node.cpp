@@ -7,7 +7,7 @@
  
 #include <iostream>
 #include "ros/ros.h"
-#include "realsense_devel/Bbox.h"
+#include "camera3d_xyzrgb/Bbox.h"
 
 int main(int argc, char** argv){
     // ROS initialization

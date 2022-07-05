@@ -8,15 +8,15 @@
 #ifndef _DETECTOR_H_
 #define _DETECTOR_H_
 
-#include<iostream>
+#include <iostream>
 #include "ros/ros.h"
 #include "sensor_msgs/PointCloud2.h"
 // PCL specific includes
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
-#include<realsense_devel/BoundingBox3DArray.h>
-#include<nav_msgs/Odometry.h>
+#include <camera3d_xyzrgb/BoundingBox3DArray.h>
+#include <nav_msgs/Odometry.h>
 #include <tf/transform_listener.h>
 
 class Detector {

@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <launch>
 
-  <rosparam file="$(find realsense_devel)/config/detector.yaml" />
+  <rosparam file="$(find camera3d_xyzrgb)/config/detector.yaml" />
   <param name="/use_sim_time" value="true" />  
   <node pkg="rosbag" type="play" name="player" output="screen" args="-l --clock /home/giacomo/Desktop/bagfiles/camera_lidar.bag"/>
   
-  <node name="detector_node" pkg="realsense_devel" type="detector_node" output="screen" />
-  <node name="bbox_node" pkg="realsense_devel" type="bbox_node" output="screen" />
-  <node name="camera_tf_broadcaster" pkg="realsense_devel" type="camera_tf_broadcaster" output="screen" />
-  <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find realsense_devel)/rviz/camera_bag.rviz"/>
+  <node name="detector_node" pkg="camera3d_xyzrgb" type="detector_node" output="screen" />
+  <node name="bbox_node" pkg="camera3d_xyzrgb" type="bbox_node" output="screen" />
+  <node name="camera_tf_broadcaster" pkg="camera3d_xyzrgb" type="camera_tf_broadcaster" output="screen" />
+  <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find camera3d_xyzrgb)/rviz/camera_bag.rviz"/>
   
 </launch>
