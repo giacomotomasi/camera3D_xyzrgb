@@ -9,20 +9,20 @@ pointCloud processing steps:
 - 3D bounding box extraction with moment of inertia (BoungingBox_,oi class) methods;
 - Rviz visualization;
 ### Example
-Download the [rs_pointcloud.bag](https://scientificnet-my.sharepoint.com/:u:/g/personal/giatomasi_unibz_it/EZAB6zj-c29Igs8RLlMhhFoBK6kkYPkcxe1sNWO1OJeyAQ?e=mMgpUq) file and copy it in realsense_devel/bagfiles.
+Download the [rs_pointcloud.bag](https://scientificnet-my.sharepoint.com/:u:/g/personal/giatomasi_unibz_it/EZAB6zj-c29Igs8RLlMhhFoBK6kkYPkcxe1sNWO1OJeyAQ?e=mMgpUq) file and copy it in camera3d_xyzrgb/bagfiles.
 The launch file provides a bag file with a PointCloud used to detect two obstacles. It launches the bag file, detector_node, bbox_node (modify this file to select bbox method) and Rviz window.
 ```
-roslaunch realsense_devel sim.launch
+roslaunch camera3d_xyzrgb sim.launch
 ```
 #### Note: this example works with obstacle_detection_v1
 ### Real Camera (realsense model)
 Use the package with real camera sensor. It launches the nodes listed above but it replaces data from bag file with camera data.
 ```
-roslaunch realsense_devel object_detection.launch
+roslaunch camera3d_xyzrgb object_detection.launch
 ```
 
 ### Result
-![Result in Rviz](https://github.com/giacomotomasi/realsense_devel/blob/main/img/rviz_result.png)
+![Result in Rviz](https://github.com/giacomotomasi/camera3d_xyzrgb/blob/main/img/rviz_result.png)
 
 ### To keep in mind
 The processing algorithms are tuned to this specific application example. You need to set proper parameters for your own application. You can change such parameters from */config/detector.yaml* file.
