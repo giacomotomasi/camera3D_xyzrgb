@@ -1,5 +1,5 @@
-# realsense_devel
-Package for PointCloud filtering using PCL (point cloud library) and Intel RealSense camera.
+# camera3d_xyzrgb
+Package for PointCloud filtering using PCL (point cloud library) and 3D camera.
 
 pointCloud processing steps:
 - Voxel Grid point reduction;
