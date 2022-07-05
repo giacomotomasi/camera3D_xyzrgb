@@ -6,7 +6,7 @@ pointCloud processing steps:
 - Segmentation for ground/plane detection (RANSAC);
 - Outlier removal;
 - Clustering (euclidean cluster extraction);
-- 3D bounding box extraction with PCA (BoungingBox_pca class) or moment of inertia (BoungingBox_,oi class) methods;
+- 3D bounding box extraction with moment of inertia (BoungingBox_,oi class) methods;
 - Rviz visualization;
 ### Example
 Download the [rs_pointcloud.bag](https://scientificnet-my.sharepoint.com/:u:/g/personal/giatomasi_unibz_it/EZAB6zj-c29Igs8RLlMhhFoBK6kkYPkcxe1sNWO1OJeyAQ?e=mMgpUq) file and copy it in realsense_devel/bagfiles.
