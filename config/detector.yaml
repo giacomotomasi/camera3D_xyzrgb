@@ -2,7 +2,10 @@ pointcloud_topic:
     camera_topic: /camera/depth/color/points
 
 reference_frame:
-    frame_id: base_link
+    frame_id: base_footprint
+
+fixed_frame:
+    frame_id: map
     
 transform:
     position:
@@ -45,3 +48,7 @@ cluster_extraction:
     min_cluster_size: 500
     max_cluster_size: 25000
     enable: true
+    
+boundingbox:
+    offset: 0.2
+    oriented: false
