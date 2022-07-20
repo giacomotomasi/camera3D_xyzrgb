@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <launch>
 
-    <include file="$(find camera3d_xyzrgb)/launch/realsense_pointcloud.launch" />
+    <!--<include file="$(find camera3d_xyzrgb)/launch/realsense_pointcloud.launch" /> -->
     <rosparam file="$(find camera3d_xyzrgb)/config/detector.yaml" />
-    <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find camera3d_xyzrgb)/rviz/sim_bbox.rviz"/>
+    <!--<node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find camera3d_xyzrgb)/rviz/sim_bbox.rviz"/>-->
     <node name="detector_node" pkg="camera3d_xyzrgb" type="detector_node" output="screen" />
     <node name="bbox_node" pkg="camera3d_xyzrgb" type="bbox_node" output="screen" />
 
