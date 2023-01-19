@@ -50,3 +50,5 @@ target_link_libraries(bbox_node ${catkin_LIBRARIES})
 add_executable(camera_tf_broadcaster src/camera_tf_broadcaster.cpp)
 target_link_libraries(camera_tf_broadcaster ${catkin_LIBRARIES})
 
+add_dependencies(detector_node camera3d_xyzrgb_generate_messages_cpp)
+add_dependencies(bbox_node_node camera3d_xyzrgb_generate_messages_cpp)
